@@ -6,6 +6,7 @@ import com.game.ipl.entity.MatchInfo;
 import com.game.ipl.entity.TeamScore;
 import com.game.ipl.entity.UserInfo;
 import com.game.ipl.entity.UserResult;
+import com.game.ipl.services.JWTService;
 import com.game.ipl.services.VotingService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,6 +14,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.ArrayList;
@@ -27,7 +29,10 @@ public class ResultController {
     private DynamoDBMapper mapper;
     @Autowired
     private VotingService votingService;
+    @Autowired
+    private JWTService jwtService;
 
+    //disable for prod
     @PostMapping("/result")
     public ResponseEntity<List<UserResult>> populateResult(@RequestParam String winner, @RequestParam String matchId) {
         this.updateMatchWinner(winner, matchId);
@@ -43,8 +48,8 @@ public class ResultController {
     }
 
     @GetMapping("/dashboard")
-    public ResponseEntity<UserResult> getUserResult(@RequestParam String username) {
-        return ResponseEntity.ok(mapper.load(UserResult.class, username));
+    public ResponseEntity<UserResult> getUserResult(@RequestHeader("Authorization") String token) {
+        return ResponseEntity.ok(mapper.load(UserResult.class, jwtService.getUsername(token)));
     }
 
 

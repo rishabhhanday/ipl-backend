@@ -24,12 +24,14 @@ public class MatchController {
     @Autowired
     private JWTService jwtService;
 
+    // done by admin , disable for prod
     @PostMapping("/match")
     ResponseEntity<MatchInfo> registerMatch(@RequestBody MatchInfo matchInfo) {
         log.info("Registering match information .");
         return ResponseEntity.status(HttpStatus.CREATED).body(matchService.save(matchInfo));
     }
 
+    //disable for prod
     @GetMapping("/match/{id}")
     ResponseEntity<MatchInfo> matchInfo(@PathVariable(value = "id") String id) {
         return ResponseEntity.ok(mapper.load(MatchInfo.class, id));
