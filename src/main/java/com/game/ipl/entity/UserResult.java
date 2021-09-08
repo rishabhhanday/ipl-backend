@@ -18,6 +18,6 @@ public class UserResult {
     @DynamoDBHashKey
     private String username;
     private Map<String, TeamScore> teamScore;
-    private Integer points;
+    private Integer points = 0;
     private UserInfo userInfo;
 }

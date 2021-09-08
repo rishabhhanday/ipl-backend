@@ -64,16 +64,26 @@ public class ResultController {
                 Map<String, TeamScore> teamScoreMap = new HashMap<>();
                 TeamScore teamScore = votingInfo.getVotedOn().equals(winner) ? createWinningTeamScore(matchId) : createLosingTeamScore(matchId);
                 teamScoreMap.put(votingInfo.getVotedOn(), teamScore);
-                userResult = UserResult.builder().userInfo(userInfo).points(votingInfo.getMatchInfo().getMatchPoint()).username(userInfo.getUsername()).teamScore(teamScoreMap).build();
+                userResult = UserResult.builder().userInfo(userInfo).username(userInfo.getUsername()).teamScore(teamScoreMap).build();
+                if (!votingInfo.getVotedOn().equals(winner)) {
+                    userResult.setPoints(votingInfo.getMatchInfo().getMatchPoint());
+                }
             } else if (userResult.getTeamScore().get(votingInfo.getVotedOn()) == null) {
                 // if result table was present but first time vote on team .
                 TeamScore teamScore = votingInfo.getVotedOn().equals(winner) ? createWinningTeamScore(matchId) : createLosingTeamScore(matchId);
+                if (!votingInfo.getVotedOn().equals(winner)) {
+                    userResult.setPoints(userResult.getPoints() == null ? 0 : userResult.getPoints() + votingInfo.getMatchInfo().getMatchPoint());
+                }
                 userResult.getTeamScore().put(votingInfo.getVotedOn(), teamScore);
             } else {
                 // if result table was present and voted on team more than once
                 // tested by rishabh
                 TeamScore teamScore = userResult.getTeamScore().get(votingInfo.getVotedOn());
+                if (!votingInfo.getVotedOn().equals(winner) && !teamScore.getLosingMatchIds().contains(matchId)) {
+                    userResult.setPoints(userResult.getPoints() == null ? 0 : userResult.getPoints() + votingInfo.getMatchInfo().getMatchPoint());
+                }
                 Boolean winnerOrLoser = votingInfo.getVotedOn().equals(winner) ? teamScore.getWinningMatchIds().add(matchId) : teamScore.getLosingMatchIds().add(matchId);
+
             }
 
             return userResult;
@@ -90,11 +100,16 @@ public class ResultController {
                 userResult = UserResult.builder().userInfo(userInfo).points(mapper.load(MatchInfo.class, matchId).getMatchPoint()).username(userInfo.getUsername()).teamScore(teamScoreMap).build();
             } else if (userResult.getTeamScore().get(winner) == null) {
                 // user result found but data of losing team missing.
+
+                userResult.setPoints(userResult.getPoints() == null ? 0 : userResult.getPoints() + mapper.load(MatchInfo.class, matchId).getMatchPoint());
                 TeamScore teamScore = createLosingTeamScore(matchId);
                 userResult.getTeamScore().put(winner, teamScore);
             } else {
                 //use result found and data of losing team is present.
                 TeamScore teamScore = userResult.getTeamScore().get(winner);
+                if (!teamScore.getLosingMatchIds().contains(matchId)) {
+                    userResult.setPoints(userResult.getPoints() == null ? 0 : userResult.getPoints() + mapper.load(MatchInfo.class, matchId).getMatchPoint());
+                }
                 teamScore.getLosingMatchIds().add(matchId);
             }
 
