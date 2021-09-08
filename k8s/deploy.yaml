@@ -1,0 +1,39 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  creationTimestamp: null
+  labels:
+    app: ipl
+  name: ipl
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ipl
+  strategy: {}
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: ipl
+    spec:
+      volumes:
+        - name: secret-properties
+          secret:
+            secretName: ipl-secrets
+        - name: application-properties
+          configMap:
+            name: ipl-properties
+      containers:
+      - image: rishabhhanday/ipl:v1
+        name: ipl
+        resources: {}
+        env:
+          - name: SPRING_CONFIG_LOCATION
+            value: /deployment/config/application.properties, /deployment/secret/application.properties
+        volumeMounts:
+          - name: application-properties
+            mountPath: /deployment/config/
+          - name: secret-properties
+            mountPath: /deployment/secret/
+status: {}

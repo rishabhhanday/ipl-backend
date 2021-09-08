@@ -1,0 +1,9 @@
+apiVersion: v1
+data:
+  application.properties: |
+    aws.dynamodb-local.enabled=false
+    aws.region=ap-south-1
+    aws.dynamodb-local.endpoint=http://localhost:8000
+kind: ConfigMap
+metadata:
+  name: ipl-properties
