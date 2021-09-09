@@ -47,12 +47,6 @@ public class ResultController {
         log.info("winner updated, {}", matchInfo);
     }
 
-    @GetMapping("/dashboard")
-    public ResponseEntity<UserResult> getUserResult(@RequestHeader("Authorization") String token) {
-        return ResponseEntity.ok(mapper.load(UserResult.class, jwtService.getUsername(token)));
-    }
-
-
     private UserResult populateUser(String winner, String matchId, UserInfo userInfo) {
         UserResult result = votingService.getVotingInfo(matchId, userInfo.getUsername()).map(votingInfo -> {
 

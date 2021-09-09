@@ -21,7 +21,6 @@ public class UserInfo {
     private String emailId;
     private String department;
     private String role;
-    @JsonIgnore
     private String password;
 }
 
