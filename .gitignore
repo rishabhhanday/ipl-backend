@@ -30,6 +30,7 @@ build/
 !**/src/test/**/build/
 
 k8s/secrets.yaml
-
+k8s/docker-config.json
 ### VS Code ###
 .vscode/
+postman_collection/IPL.postman_collection.json
