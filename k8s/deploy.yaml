@@ -17,6 +17,8 @@ spec:
       labels:
         app: ipl
     spec:
+      imagePullSecrets:
+        - name: regcred
       volumes:
         - name: secret-properties
           secret:
@@ -25,7 +27,7 @@ spec:
           configMap:
             name: ipl-properties
       containers:
-      - image: rishabhhanday/ipl:v1
+      - image: rishabhhanday/ipl:v2
         name: ipl
         resources: {}
         env:
