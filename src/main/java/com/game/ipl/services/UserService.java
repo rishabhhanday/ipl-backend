@@ -10,6 +10,7 @@ import com.game.ipl.model.UserCreationRequest;
 import com.game.ipl.model.UserCreationResponse;
 import com.game.ipl.repositories.UserRepository;
 import lombok.extern.slf4j.Slf4j;
+import org.jasypt.util.password.BasicPasswordEncryptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -20,6 +21,8 @@ public class UserService {
     private UserRepository userRepository;
     @Autowired
     private JWTService jwtService;
+    @Autowired
+    private BasicPasswordEncryptor passwordEncryptor;
 
     public UserCreationResponse save(UserCreationRequest userCreationRequest) {
         if (userRepository.findById(userCreationRequest.getUsername()).isPresent()) {
@@ -30,6 +33,7 @@ public class UserService {
         UserInfo userInfo = new ObjectMapper().convertValue(userCreationRequest, UserInfo.class);
         log.info("Saving userInfo to database , username: {}", userInfo.getUsername());
 
+        userInfo.setPassword(passwordEncryptor.encryptPassword(userInfo.getPassword()));
         userRepository.save(userInfo);
         log.info("User successfully saved to database");
 
@@ -43,7 +47,7 @@ public class UserService {
         return userRepository
                 .findById(loginRequest.getUsername())
                 .map(userInfo -> {
-                    if (userInfo.getPassword().equals(loginRequest.getPassword())) {
+                    if (passwordEncryptor.checkPassword(loginRequest.getPassword(), userInfo.getPassword())) {
                         return LoginResponse.builder().token(jwtService.createToken(userInfo)).build();
                     }
 
