@@ -15,4 +15,5 @@ public class UserInfoResponse {
     private String emailId;
     private String department;
     private String role;
+    private String imageURL;
 }

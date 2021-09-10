@@ -27,6 +27,8 @@ public class VotingService {
     public VotingInfo vote(VotingRequest votingRequest, String username) {
         log.info("Getting matchInfo, {}", votingRequest);
         MatchInfo matchInfo = mapper.load(MatchInfo.class, votingRequest.getMatchId());
+        if (matchInfo == null) throw new VotingFailedException("Invalid matchID : " + votingRequest.getMatchId());
+
         if (matchInfo.getMatchOn().toInstant().isBefore(Instant.now().plus(1, HOURS))) {
             throw new VotingFailedException("Voting time expired");
         }
@@ -49,7 +51,7 @@ public class VotingService {
     public Optional<VotingInfo> getVotingInfo(String matchId, String username) {
         log.info("Getting vote information from DB , matchId={} , username={}", matchId, username);
 
-        Map<String, AttributeValue> eav = new HashMap<String, AttributeValue>();
+        Map<String, AttributeValue> eav = new HashMap<>();
         eav.put(":val1", new AttributeValue().withS(matchId));
         eav.put(":val2", new AttributeValue().withS(username));
         DynamoDBQueryExpression<VotingInfo> queryExpression = new DynamoDBQueryExpression<VotingInfo>()

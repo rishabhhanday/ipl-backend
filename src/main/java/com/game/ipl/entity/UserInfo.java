@@ -22,5 +22,6 @@ public class UserInfo {
     private String department;
     private String role;
     private String password;
+    private String imageURL;
 }
 

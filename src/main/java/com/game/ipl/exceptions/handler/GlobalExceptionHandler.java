@@ -1,5 +1,6 @@
 package com.game.ipl.exceptions.handler;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.game.ipl.exceptions.FailedCreateUserException;
 import com.game.ipl.exceptions.LoginFailedException;
 import com.game.ipl.exceptions.TokenValidationException;
@@ -34,7 +35,7 @@ public class GlobalExceptionHandler {
     }
 
 
-    @ExceptionHandler(value = {FailedCreateUserException.class, LoginFailedException.class, VotingFailedException.class})
+    @ExceptionHandler(value = {JsonProcessingException.class,FailedCreateUserException.class, LoginFailedException.class, VotingFailedException.class})
     public ResponseEntity<Map<String, String>> handleBadRequest(Exception ex) {
         log.error(ex.getMessage());
         Map<String, String> response = new HashMap<>();
