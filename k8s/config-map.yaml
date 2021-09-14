@@ -4,6 +4,7 @@ data:
     aws.dynamodb-local.enabled=false
     aws.region=ap-south-1
     aws.dynamodb-local.endpoint=http://localhost:8000
+    ipl.teams=DC,CSK,RCB,MI,RR,PBKS,KKR,SRH
 kind: ConfigMap
 metadata:
   name: ipl-properties

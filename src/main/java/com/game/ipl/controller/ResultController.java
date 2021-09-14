@@ -2,19 +2,15 @@ package com.game.ipl.controller;
 
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapper;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBScanExpression;
-import com.game.ipl.entity.MatchInfo;
-import com.game.ipl.entity.TeamScore;
-import com.game.ipl.entity.UserInfo;
-import com.game.ipl.entity.UserResult;
+import com.game.ipl.entity.*;
+import com.game.ipl.exceptions.MatchResultPopulationFailed;
 import com.game.ipl.services.JWTService;
 import com.game.ipl.services.VotingService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.ArrayList;
@@ -56,7 +52,7 @@ public class ResultController {
             if (userResult == null) {
                 // if voting was done , but result table was not populated .
                 Map<String, TeamScore> teamScoreMap = new HashMap<>();
-                TeamScore teamScore = votingInfo.getVotedOn().equals(winner) ? createWinningTeamScore(matchId) : createLosingTeamScore(matchId);
+                TeamScore teamScore = votingInfo.getVotedOn().equals(winner) ? createWinningTeamScore(matchId) : createLosingTeamScore(matchId, false);
                 teamScoreMap.put(votingInfo.getVotedOn(), teamScore);
                 userResult = UserResult.builder().userInfo(userInfo).username(userInfo.getUsername()).teamScore(teamScoreMap).build();
                 if (!votingInfo.getVotedOn().equals(winner)) {
@@ -64,7 +60,7 @@ public class ResultController {
                 }
             } else if (userResult.getTeamScore().get(votingInfo.getVotedOn()) == null) {
                 // if result table was present but first time vote on team .
-                TeamScore teamScore = votingInfo.getVotedOn().equals(winner) ? createWinningTeamScore(matchId) : createLosingTeamScore(matchId);
+                TeamScore teamScore = votingInfo.getVotedOn().equals(winner) ? createWinningTeamScore(matchId) : createLosingTeamScore(matchId, false);
                 if (!votingInfo.getVotedOn().equals(winner)) {
                     userResult.setPoints(userResult.getPoints() == null ? 0 : userResult.getPoints() + votingInfo.getMatchInfo().getMatchPoint());
                 }
@@ -73,10 +69,10 @@ public class ResultController {
                 // if result table was present and voted on team more than once
                 // tested by rishabh
                 TeamScore teamScore = userResult.getTeamScore().get(votingInfo.getVotedOn());
-                if (!votingInfo.getVotedOn().equals(winner) && !teamScore.getLosingMatchIds().contains(matchId)) {
+                if (!votingInfo.getVotedOn().equals(winner) && !isMatchIDPresent(teamScore.getLosingMatchInfos(), matchId)) {
                     userResult.setPoints(userResult.getPoints() == null ? 0 : userResult.getPoints() + votingInfo.getMatchInfo().getMatchPoint());
                 }
-                Boolean winnerOrLoser = votingInfo.getVotedOn().equals(winner) ? teamScore.getWinningMatchIds().add(matchId) : teamScore.getLosingMatchIds().add(matchId);
+                Boolean winnerOrLoser = votingInfo.getVotedOn().equals(winner) ? teamScore.getWinningMatchIds().add(matchId) : teamScore.getLosingMatchInfos().add(LosingMatchInfo.builder().isVotingSkipped(false).matchId(matchId).build());
 
             }
 
@@ -89,46 +85,43 @@ public class ResultController {
 
                 // user result not found
                 Map<String, TeamScore> teamScoreMap = new HashMap<>();
-                TeamScore teamScore = createLosingTeamScore(matchId);
+                TeamScore teamScore = createLosingTeamScore(matchId, true);
                 teamScoreMap.put(winner, teamScore);
                 userResult = UserResult.builder().userInfo(userInfo).points(mapper.load(MatchInfo.class, matchId).getMatchPoint()).username(userInfo.getUsername()).teamScore(teamScoreMap).build();
             } else if (userResult.getTeamScore().get(winner) == null) {
                 // user result found but data of losing team missing.
 
                 userResult.setPoints(userResult.getPoints() == null ? 0 : userResult.getPoints() + mapper.load(MatchInfo.class, matchId).getMatchPoint());
-                TeamScore teamScore = createLosingTeamScore(matchId);
+                TeamScore teamScore = createLosingTeamScore(matchId, true);
                 userResult.getTeamScore().put(winner, teamScore);
             } else {
                 //use result found and data of losing team is present.
                 TeamScore teamScore = userResult.getTeamScore().get(winner);
-                if (!teamScore.getLosingMatchIds().contains(matchId)) {
+                if (!isMatchIDPresent(teamScore.getLosingMatchInfos(), matchId)) {
                     userResult.setPoints(userResult.getPoints() == null ? 0 : userResult.getPoints() + mapper.load(MatchInfo.class, matchId).getMatchPoint());
                 }
-                teamScore.getLosingMatchIds().add(matchId);
+                teamScore.getLosingMatchInfos().add(LosingMatchInfo.builder().isVotingSkipped(true).matchId(matchId).build());
             }
 
             return userResult;
         });
 
-        mapper.save(result);
-        log.info("result {}", result);
-
         return result;
     }
 
-    private TeamScore createWinningTeamScore(String winner) {
+    private TeamScore createWinningTeamScore(String matchId) {
         TeamScore teamScore = new TeamScore();
         List<String> winningMatchIds = new ArrayList<>();
-        winningMatchIds.add(winner);
+        winningMatchIds.add(matchId);
         teamScore.setWinningMatchIds(winningMatchIds);
         return teamScore;
     }
 
-    private TeamScore createLosingTeamScore(String winner) {
+    private TeamScore createLosingTeamScore(String matchId, boolean isVotingSkipped) {
         TeamScore teamScore = new TeamScore();
-        List<String> losingMatchIds = new ArrayList<>();
-        losingMatchIds.add(winner);
-        teamScore.setLosingMatchIds(losingMatchIds);
+        List<LosingMatchInfo> losingMatchInfos = new ArrayList<>();
+        losingMatchInfos.add(LosingMatchInfo.builder().isVotingSkipped(isVotingSkipped).matchId(matchId).build());
+        teamScore.setLosingMatchInfos(losingMatchInfos);
         return teamScore;
     }
 
@@ -140,6 +133,29 @@ public class ResultController {
             userResults.add(populateUser(winner, matchId, userInfo));
         }
 
+        log.info("Calculating rank");
+        userResults.sort((userOne, userTwo) -> userTwo.getPoints() - userOne.getPoints());
+
+        Integer rank = 1;
+        for (UserResult userResult : userResults) {
+            userResult.setRank(rank++);
+        }
+
+        final List<DynamoDBMapper.FailedBatch> failedBatches = mapper.batchSave(userResults);
+        if(!failedBatches.isEmpty()){
+            throw new MatchResultPopulationFailed(failedBatches);
+        }
+
         return userResults;
+    }
+
+    private boolean isMatchIDPresent(List<LosingMatchInfo> losingMatchInfos, String matchId) {
+        for (LosingMatchInfo losingMatchInfo : losingMatchInfos) {
+            if (losingMatchInfo.getMatchId().equals(matchId)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 }

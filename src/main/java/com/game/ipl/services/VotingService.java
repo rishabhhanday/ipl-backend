@@ -9,10 +9,12 @@ import com.game.ipl.exceptions.VotingFailedException;
 import com.game.ipl.model.VotingRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -23,6 +25,9 @@ import static java.time.temporal.ChronoUnit.HOURS;
 public class VotingService {
     @Autowired
     private DynamoDBMapper mapper;
+
+    @Value("${ipl.teams}")
+    private List<String> teamNames;
 
     public VotingInfo vote(VotingRequest votingRequest, String username) {
         log.info("Getting matchInfo, {}", votingRequest);
@@ -36,7 +41,7 @@ public class VotingService {
         VotingInfo votingInfo = this.getVotingInfo(votingRequest.getMatchId(), username).orElseGet(() -> VotingInfo.builder().matchInfo(matchInfo).matchId(votingRequest.getMatchId()).username(username).votedOn("SKIPPED").voteRemaining(2).build());
         log.info("Got vote details , {}", votingInfo);
 
-        if (votingInfo.getVoteRemaining() == 0 || !(votingRequest.getVoteOn().equals(matchInfo.getTeamA()) || votingRequest.getVoteOn().equals(matchInfo.getTeamB()))) {
+        if (!teamNames.contains(votingRequest.getVoteOn()) || votingInfo.getVoteRemaining() == 0 || !(votingRequest.getVoteOn().equals(matchInfo.getTeamA()) || votingRequest.getVoteOn().equals(matchInfo.getTeamB()))) {
             throw new VotingFailedException("Number of votes remaining is 0 or incorrect voting team name.");
         }
 

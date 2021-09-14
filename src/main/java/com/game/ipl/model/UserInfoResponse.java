@@ -9,7 +9,6 @@ import lombok.*;
 @ToString
 @Builder
 public class UserInfoResponse {
-    private String username;
     private String firstName;
     private String lastName;
     private String emailId;
