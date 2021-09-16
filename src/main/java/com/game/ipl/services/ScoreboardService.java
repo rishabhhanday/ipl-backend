@@ -22,6 +22,8 @@ public class ScoreboardService {
     private DynamoDBMapper mapper;
     @Autowired
     private ObjectMapper objectMapper;
+    @Autowired
+    private DashboardService dashboardService;
 
     public ScoreboardResponse getScore() {
         List<UserResult> userResultList = new ArrayList<>(mapper.scan(UserResult.class, new DynamoDBScanExpression()));
@@ -42,9 +44,11 @@ public class ScoreboardService {
         }
 
         Integer totalScore = calulateTotoalScore(userResultList);
-        List<DashboardResponse> dashboardResponses = userResultList.stream().map(userResult -> objectMapper.convertValue(userResult, DashboardResponse.class)).collect(Collectors.toList());
+        List<DashboardResponse> dashboardResponses = userResultList.stream().map(userResult -> dashboardService.userResultToDashboardMapper(userResult, null)).collect(Collectors.toList());
 
         log.info("Top scorer is : {}", dashboardResponses.get(0));
+
+
         return ScoreboardResponse
                 .builder()
                 .participants(dashboardResponses)

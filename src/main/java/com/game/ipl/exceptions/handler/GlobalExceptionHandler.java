@@ -40,7 +40,7 @@ public class GlobalExceptionHandler {
     }
 
 
-    @ExceptionHandler(value = {JsonProcessingException.class, FailedCreateUserException.class, LoginFailedException.class, VotingFailedException.class})
+    @ExceptionHandler(value = {InvalidMatchHistory.class, JsonProcessingException.class, FailedCreateUserException.class, LoginFailedException.class, VotingFailedException.class})
     public ResponseEntity<Map<String, String>> handleBadRequest(Exception ex) {
         log.error(ex.getMessage());
         Map<String, String> response = new HashMap<>();

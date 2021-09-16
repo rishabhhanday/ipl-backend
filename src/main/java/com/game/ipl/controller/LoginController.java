@@ -10,7 +10,6 @@ import org.springframework.stereotype.Controller;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
 
 import javax.validation.Valid;
 
@@ -23,8 +22,9 @@ public class LoginController {
 
     @PostMapping("/login")
     public ResponseEntity<LoginResponse> login(@Valid @RequestBody LoginRequest loginRequest) {
-        log.info("login begin");
-
-        return ResponseEntity.status(200).body(userService.login(loginRequest));
+        log.info("STARTED LOGIN | username={}", loginRequest.getUsername());
+        LoginResponse loginResponse = userService.login(loginRequest);
+        log.info("ENDED LOGIN | username={}", loginRequest.getUsername());
+        return ResponseEntity.status(200).body(loginResponse);
     }
 }

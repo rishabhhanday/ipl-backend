@@ -1,6 +1,5 @@
 package com.game.ipl.controller;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.game.ipl.model.UserCreationRequest;
 import com.game.ipl.model.UserCreationResponse;
@@ -34,9 +33,10 @@ public class SignUpController {
 
         userCreationRequest.validateUserCreationRequest();
         userCreationRequest.setUserImage(file);
-        log.info("Creating user request received : {}", userCreationRequest.getUsername());
+        log.info("STARTED SIGNUP | firstName={}, lastName={}", userCreationRequest.getFirstName(), userCreationRequest.getLastName());
         UserCreationResponse userCreationResponse = userService.save(userCreationRequest);
 
+        log.info("STARTED SIGNUP | firstName={}, lastName={}", userCreationRequest.getFirstName(), userCreationRequest.getLastName());
         return ResponseEntity
                 .status(HttpStatus.CREATED)
                 .body(userCreationResponse);

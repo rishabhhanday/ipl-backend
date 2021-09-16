@@ -21,4 +21,6 @@ public class UserResult {
     private Integer points = 0;
     private Integer rank;
     private UserInfo userInfo;
+    private Integer winningStreak = 0;
+    private Integer longestWinningStreak = 0;
 }

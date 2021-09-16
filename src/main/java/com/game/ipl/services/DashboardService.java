@@ -27,6 +27,10 @@ public class DashboardService {
     public DashboardResponse getDashboardResponse(String username) {
         UserResult userResult = mapper.load(UserResult.class, username);
 
+        return userResultToDashboardMapper(userResult, username);
+    }
+
+    public DashboardResponse userResultToDashboardMapper(UserResult userResult, String username) {
         if (userResult == null) {
             DashboardResponse dashboardResponse = new DashboardResponse();
             dashboardResponse.setPoints(0);
@@ -37,15 +41,18 @@ public class DashboardService {
             });
             dashboardResponse.setTeamScore(teamScoreMap);
             dashboardResponse.setPoints(0);
+            dashboardResponse.setRank(0);
             return dashboardResponse;
         } else {
             DashboardResponse dashboardResponse = objectMapper.convertValue(userResult, DashboardResponse.class);
-            Map<String, TeamScore> teamScoreMap = dashboardResponse.getTeamScore();
+            Map<String, TeamScore> teamScoreMap = dashboardResponse.getTeamScore() == null ? new HashMap<>() : dashboardResponse.getTeamScore();
             teams.forEach(team -> {
                 if (!teamScoreMap.containsKey(team)) {
                     teamScoreMap.put(team, new TeamScore());
                 }
             });
+
+            dashboardResponse.setTeamScore(teamScoreMap);
             return dashboardResponse;
         }
     }

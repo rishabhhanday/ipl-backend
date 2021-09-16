@@ -27,7 +27,7 @@ spec:
           configMap:
             name: ipl-properties
       containers:
-      - image: rishabhhanday/ipl:v4
+      - image: rishabhhanday/ipl:v11
         name: ipl
         resources: {}
         env:

@@ -16,4 +16,6 @@ public class DashboardResponse {
     private Integer points = 0;
     private UserInfoResponse userInfo;
     private Integer rank;
+    private Integer winningStreak = 0;
+    private Integer longestWinningStreak = 0;
 }

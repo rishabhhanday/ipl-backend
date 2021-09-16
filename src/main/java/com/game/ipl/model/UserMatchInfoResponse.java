@@ -19,6 +19,7 @@ public class UserMatchInfoResponse {
     private String winner;
     private String stadium;
     private Integer matchPoint;
+    private Integer matchNo;
     private Integer voteRemaining = 2;
     private String votedOn = "SKIPPED";
 }

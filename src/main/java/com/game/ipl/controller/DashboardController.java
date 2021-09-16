@@ -26,7 +26,12 @@ public class DashboardController {
 
     @GetMapping("/dashboard")
     public ResponseEntity<DashboardResponse> getUserResult(@RequestHeader("Authorization") String token) {
+
         String username = jwtService.getUsername(token);
-        return ResponseEntity.ok(dashboardService.getDashboardResponse(username));
+        log.info("STARTED DASHBOARD | username={}", username);
+        DashboardResponse dashboardResponse = dashboardService.getDashboardResponse(username);
+
+        log.info("ENDED DASHBOARD | username={}", username);
+        return ResponseEntity.ok(dashboardResponse);
     }
 }

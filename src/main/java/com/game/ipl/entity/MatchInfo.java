@@ -22,4 +22,5 @@ public class MatchInfo {
     private String winner;
     private String stadium;
     private Integer matchPoint;
+    private Integer matchNo;
 }
