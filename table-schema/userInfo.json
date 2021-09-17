@@ -1,0 +1,20 @@
+{
+  "AttributeDefinitions": [
+    {
+      "AttributeName": "username",
+      "AttributeType": "S"
+    }
+  ],
+  "TableName": "userInfo",
+  "KeySchema": [
+    {
+      "AttributeName": "username",
+      "KeyType": "HASH"
+    }
+  ],
+  "ProvisionedThroughput": {
+    "ReadCapacityUnits": 1,
+    "WriteCapacityUnits": 1
+  }
+}
+

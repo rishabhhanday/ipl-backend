@@ -10,6 +10,7 @@ import javax.validation.ConstraintViolation;
 import javax.validation.Validation;
 import javax.validation.Validator;
 import javax.validation.ValidatorFactory;
+import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import java.util.Set;
 
@@ -19,19 +20,13 @@ import java.util.Set;
 @AllArgsConstructor
 @ToString
 public class UserCreationRequest {
-    @NotNull
+    @NotEmpty
     private String username;
-    @NotNull
+    @NotEmpty
     private String firstName;
-    @NotNull
+    @NotEmpty
     private String lastName;
-    @NotNull
-    private String emailId;
-    @NotNull
-    private String department;
-    @NotNull
-    private String role;
-    @NotNull
+    @NotEmpty
     private String password;
     @JsonIgnore
     private MultipartFile userImage;

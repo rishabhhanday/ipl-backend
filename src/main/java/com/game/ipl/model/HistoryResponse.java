@@ -13,7 +13,5 @@ import java.util.List;
 @Builder
 public class HistoryResponse {
     private MatchInfo matchInfo;
-    private List<String> winnerUsersList;
-    private List<String> losingUsersList;
-    private List<String> skippedUsersList;
+    private List<ParticipantVotingHistory> participantsVotingHistory;
 }

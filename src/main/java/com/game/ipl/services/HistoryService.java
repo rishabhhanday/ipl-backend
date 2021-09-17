@@ -9,12 +9,16 @@ import com.game.ipl.entity.UserInfo;
 import com.game.ipl.entity.VotingInfo;
 import com.game.ipl.exceptions.InvalidMatchHistory;
 import com.game.ipl.model.HistoryResponse;
+import com.game.ipl.model.ParticipantVotingHistory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
 import java.util.*;
+
+import static com.game.ipl.model.ParticipantVotingHistory.Status.*;
+
 
 @Service
 public class HistoryService {
@@ -32,12 +36,9 @@ public class HistoryService {
     }
 
     private HistoryResponse getHistoryResponse(List<VotingInfo> votingInfos, MatchInfo matchInfo) {
-        List<String> winnerUsersList = new ArrayList<>();
-        List<String> losingUsersList = new ArrayList<>();
-        List<String> skippedUsersList = new ArrayList<>();
+        List<ParticipantVotingHistory> participantVotingHistories = new ArrayList<>();
 
         List<UserInfo> userInfos = mapper.scan(UserInfo.class, new DynamoDBScanExpression());
-
         userInfos.forEach(userInfo -> {
             String username = userInfo.getUsername();
             String fullName = userInfo.getFirstName() + " " + userInfo.getLastName();
@@ -47,22 +48,42 @@ public class HistoryService {
                     .findFirst();
 
             if (votingInformation.isPresent()) {
-                if (votingInformation.get().getVotedOn().equals(matchInfo.getWinner())) {
-                    winnerUsersList.add(fullName);
+                if (matchInfo.getWinner().equals("TBD")) {
+                    participantVotingHistories.add(ParticipantVotingHistory
+                            .builder()
+                            .status(TBD)
+                            .votedOn(votingInformation.get().getVotedOn())
+                            .fullName(fullName)
+                            .build());
+                } else if (votingInformation.get().getVotedOn().equals(matchInfo.getWinner())) {
+                    participantVotingHistories.add(ParticipantVotingHistory
+                            .builder()
+                            .status(WON)
+                            .votedOn(votingInformation.get().getVotedOn())
+                            .fullName(fullName)
+                            .build());
                 } else {
-                    losingUsersList.add(fullName);
+                    participantVotingHistories.add(ParticipantVotingHistory
+                            .builder()
+                            .status(LOST)
+                            .votedOn(votingInformation.get().getVotedOn())
+                            .fullName(fullName)
+                            .build());
                 }
             } else {
-                skippedUsersList.add(fullName);
+                participantVotingHistories.add(ParticipantVotingHistory
+                        .builder()
+                        .status(NOT_VOTED)
+                        .votedOn("")
+                        .fullName(fullName)
+                        .build());
             }
         });
 
         return HistoryResponse
                 .builder()
-                .winnerUsersList(winnerUsersList)
-                .losingUsersList(losingUsersList)
-                .skippedUsersList(skippedUsersList)
                 .matchInfo(matchInfo)
+                .participantsVotingHistory(participantVotingHistories)
                 .build();
     }
 

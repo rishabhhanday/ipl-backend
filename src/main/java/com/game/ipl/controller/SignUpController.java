@@ -28,7 +28,7 @@ public class SignUpController {
     private ObjectMapper objectMapper;
 
     @PostMapping(value = "/signup", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<UserCreationResponse> createUser(@Valid @RequestParam MultipartFile file, @RequestParam String userInfo) throws IOException {
+    public ResponseEntity<UserCreationResponse> createUser(@RequestParam(required = false) MultipartFile file, @RequestParam String userInfo) throws IOException {
         UserCreationRequest userCreationRequest = objectMapper.readValue(userInfo, UserCreationRequest.class);
 
         userCreationRequest.validateUserCreationRequest();

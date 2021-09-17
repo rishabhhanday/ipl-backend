@@ -5,6 +5,7 @@ data:
     aws.region=ap-south-1
     aws.dynamodb-local.endpoint=http://localhost:8000
     ipl.teams=DC,CSK,RCB,MI,RR,PBKS,KKR,SRH
+    ipl.participants.image.location=/Users/rishabhhanday/Downloads/ipl-user-images/
 kind: ConfigMap
 metadata:
   name: ipl-properties

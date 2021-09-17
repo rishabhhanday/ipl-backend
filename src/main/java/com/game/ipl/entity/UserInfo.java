@@ -18,9 +18,6 @@ public class UserInfo {
     private String username;
     private String firstName;
     private String lastName;
-    private String emailId;
-    private String department;
-    private String role;
     private String password;
     private String imageURL;
 }

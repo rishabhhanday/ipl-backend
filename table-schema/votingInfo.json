@@ -1,0 +1,28 @@
+{
+  "AttributeDefinitions": [
+    {
+      "AttributeName": "matchId",
+      "AttributeType": "S"
+    },
+    {
+      "AttributeName": "username",
+      "AttributeType": "S"
+    }
+  ],
+  "TableName": "votingInfo",
+  "KeySchema": [
+    {
+      "AttributeName": "matchId",
+      "KeyType": "HASH"
+    },
+    {
+      "AttributeName": "username",
+      "KeyType": "RANGE"
+    }
+  ],
+  "ProvisionedThroughput": {
+    "ReadCapacityUnits": 1,
+    "WriteCapacityUnits": 1
+  }
+}
+
